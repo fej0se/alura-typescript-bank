@@ -1,6 +1,6 @@
 abstract class View<T> {
 
-  private _element: Element;
+  private _element: JQuery;
   private _meses: Array<string>;
 
   constructor(seletor: string) {
@@ -19,12 +19,12 @@ abstract class View<T> {
       "Dezembro"
     ];
 
-    this._element = document.querySelector(seletor);
+    this._element = $(seletor);
   }
 
   update(model: T) {
 
-    this._element.innerHTML = this.template(model);
+    this._element.html(this.template(model));
   }
 
   getMonth() {
