@@ -1,5 +1,7 @@
 class NegociacoesView extends View<Negociacoes>{
 
+    
+
   template(negociacoes: Negociacoes): string {
       return `
       <table class="table table-hover table-bordered">
@@ -14,9 +16,10 @@ class NegociacoesView extends View<Negociacoes>{
 
           <tbody>
 
-          ${negociacoes.toArray().map(negociacao =>
+          ${
+              negociacoes.toArray().map(negociacao =>
             (`<tr>
-                        <td>${negociacao.data.getDate()}/${negociacao.data.getMonth()+1}/${negociacao.data.getFullYear()}</td>
+                        <td>${negociacao.data.getDate()} de ${this.getMonth()[(negociacao.data.getMonth())]}, ${negociacao.data.getFullYear()}</td>
                         <td>${negociacao.quantidade}</td>
                         <td>${negociacao.valor.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</td>
                         <td>${negociacao.volume.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</td>
