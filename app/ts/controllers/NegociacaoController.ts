@@ -1,9 +1,9 @@
 import { NegociacoesView, MensagemView } from '../views/index';
-import { Negociacoes, Negociacao, NegociacaoParcial } from '../models/index';
+import { Negociacoes, Negociacao } from '../models/index';
 import { logarTempoDeExecucao, domInject, throttle } from '../helpers/decorators/index';
 import { NegociacaoService } from '../services/index';
 import { imprime } from '../helpers/index';
-
+import { DiaDaSemana } from '../helpers/enums/index'
 
 export class NegociacaoController {
   @domInject('#data')
@@ -25,7 +25,7 @@ export class NegociacaoController {
     this._negociacoesView.update(this._negociacoes);
   }
 
-@logarTempoDeExecucao(true)
+  @logarTempoDeExecucao(true)
   adiciona(event: Event) {
     event.preventDefault();
 
@@ -33,7 +33,7 @@ export class NegociacaoController {
 
     if (!this._ehDiaUtil(data)) {
 
-      this._mensagemView.update('Negociações aos sábados e domingos não são aceitas');
+      this._mensagemView.update('Negociações aos sábados e domingos não são aceitas.');
       return
     }
 
@@ -46,47 +46,44 @@ export class NegociacaoController {
     //update view
     this._negociacoesView.update(this._negociacoes);
     //mensagem view
-    this._mensagemView.update('Negociação adicionada com sucesso');
+    this._mensagemView.update('Negociação adicionada com sucesso.');
 
     //imprime no console
-    imprime(negociacao, this._negociacoes, { paraTexto: () => console.log('oi')});
+    imprime(negociacao, this._negociacoes, { paraTexto: () => console.log('oi') });
   }
 
   private _ehDiaUtil(data: Date) {
 
     return data.getDay() != DiaDaSemana.Sabado && data.getDay() != DiaDaSemana.Domingo;
   }
-  
+
 
   @throttle()
-  importaDados(){
+  async importaDados() {
+    try {
+      function checkRes(res: Response) {
+        if (res.ok) {
+          return res
+        } else {
+          throw new Error(res.statusText);
+        }
+      }
 
-    function checkRes(res: Response){
-      if (res.ok){
-        return res
-      } else {
-        throw new Error(res.statusText);
-      }    
+      const negociacoesParaImportar = await this._service
+        .obterNegociacoes(checkRes)
+
+      const negociacoesJaImportadas = this._negociacoes.toArray();
+
+      negociacoesParaImportar
+        .filter((negociacao: Negociacao) =>
+          !negociacoesJaImportadas.some(jaImportada =>
+            negociacao.ehIgual(jaImportada)))
+        .forEach((negociacao: Negociacao) =>
+          this._negociacoes.adiciona(negociacao));
+      this._negociacoesView.update(this._negociacoes);
+      this._mensagemView.update('Negociações importadas com sucesso.');
+    } catch (e) {
+      this._mensagemView.update(e.message);
     }
-
-    this._service
-            .obterNegociacoes(checkRes)
-            .then(negociacoes => {
-                negociacoes.forEach((negociacao: Negociacao) => 
-                    this._negociacoes.adiciona(negociacao));
-                this._negociacoesView.update(this._negociacoes);
-                this._mensagemView.update('Negociações importadas com sucesso');
-            });   
-    
   }
-}
-
-enum DiaDaSemana {
-  Domingo,
-  Segunda,
-  Terca,
-  Quarta,
-  Quinta,
-  Sexta,
-  Sabado,
 }

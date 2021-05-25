@@ -1,4 +1,4 @@
-System.register(["../views/index", "../models/index", "../helpers/decorators/index", "../services/index", "../helpers/index"], function (exports_1, context_1) {
+System.register(["../views/index", "../models/index", "../helpers/decorators/index", "../services/index", "../helpers/index", "../helpers/enums/index"], function (exports_1, context_1) {
     "use strict";
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
         var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -6,7 +6,16 @@ System.register(["../views/index", "../models/index", "../helpers/decorators/ind
         else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
         return c > 3 && r && Object.defineProperty(target, key, r), r;
     };
-    var index_1, index_2, index_3, index_4, index_5, NegociacaoController, DiaDaSemana;
+    var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+        function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+        return new (P || (P = Promise))(function (resolve, reject) {
+            function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+            function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+            function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+            step((generator = generator.apply(thisArg, _arguments || [])).next());
+        });
+    };
+    var index_1, index_2, index_3, index_4, index_5, index_6, NegociacaoController;
     var __moduleName = context_1 && context_1.id;
     return {
         setters: [
@@ -24,6 +33,9 @@ System.register(["../views/index", "../models/index", "../helpers/decorators/ind
             },
             function (index_5_1) {
                 index_5 = index_5_1;
+            },
+            function (index_6_1) {
+                index_6 = index_6_1;
             }
         ],
         execute: function () {
@@ -39,33 +51,41 @@ System.register(["../views/index", "../models/index", "../helpers/decorators/ind
                     event.preventDefault();
                     let data = new Date(`${this._inputData.val()}T00:00`);
                     if (!this._ehDiaUtil(data)) {
-                        this._mensagemView.update('Negociações aos sábados e domingos não são aceitas');
+                        this._mensagemView.update('Negociações aos sábados e domingos não são aceitas.');
                         return;
                     }
                     const negociacao = new index_2.Negociacao(data, parseInt(this._inputQuantidade.val()), parseFloat(this._inputValor.val()));
                     this._negociacoes.adiciona(negociacao);
                     this._negociacoesView.update(this._negociacoes);
-                    this._mensagemView.update('Negociação adicionada com sucesso');
+                    this._mensagemView.update('Negociação adicionada com sucesso.');
                     index_5.imprime(negociacao, this._negociacoes, { paraTexto: () => console.log('oi') });
                 }
                 _ehDiaUtil(data) {
-                    return data.getDay() != DiaDaSemana.Sabado && data.getDay() != DiaDaSemana.Domingo;
+                    return data.getDay() != index_6.DiaDaSemana.Sabado && data.getDay() != index_6.DiaDaSemana.Domingo;
                 }
                 importaDados() {
-                    function checkRes(res) {
-                        if (res.ok) {
-                            return res;
+                    return __awaiter(this, void 0, void 0, function* () {
+                        try {
+                            function checkRes(res) {
+                                if (res.ok) {
+                                    return res;
+                                }
+                                else {
+                                    throw new Error(res.statusText);
+                                }
+                            }
+                            const negociacoesParaImportar = yield this._service
+                                .obterNegociacoes(checkRes);
+                            const negociacoesJaImportadas = this._negociacoes.toArray();
+                            negociacoesParaImportar
+                                .filter((negociacao) => !negociacoesJaImportadas.some(jaImportada => negociacao.ehIgual(jaImportada)))
+                                .forEach((negociacao) => this._negociacoes.adiciona(negociacao));
+                            this._negociacoesView.update(this._negociacoes);
+                            this._mensagemView.update('Negociações importadas com sucesso.');
                         }
-                        else {
-                            throw new Error(res.statusText);
+                        catch (e) {
+                            this._mensagemView.update(e.message);
                         }
-                    }
-                    this._service
-                        .obterNegociacoes(checkRes)
-                        .then(negociacoes => {
-                        negociacoes.forEach((negociacao) => this._negociacoes.adiciona(negociacao));
-                        this._negociacoesView.update(this._negociacoes);
-                        this._mensagemView.update('Negociações importadas com sucesso');
                     });
                 }
             };
@@ -85,15 +105,6 @@ System.register(["../views/index", "../models/index", "../helpers/decorators/ind
                 index_3.throttle()
             ], NegociacaoController.prototype, "importaDados", null);
             exports_1("NegociacaoController", NegociacaoController);
-            (function (DiaDaSemana) {
-                DiaDaSemana[DiaDaSemana["Domingo"] = 0] = "Domingo";
-                DiaDaSemana[DiaDaSemana["Segunda"] = 1] = "Segunda";
-                DiaDaSemana[DiaDaSemana["Terca"] = 2] = "Terca";
-                DiaDaSemana[DiaDaSemana["Quarta"] = 3] = "Quarta";
-                DiaDaSemana[DiaDaSemana["Quinta"] = 4] = "Quinta";
-                DiaDaSemana[DiaDaSemana["Sexta"] = 5] = "Sexta";
-                DiaDaSemana[DiaDaSemana["Sabado"] = 6] = "Sabado";
-            })(DiaDaSemana || (DiaDaSemana = {}));
         }
     };
 });
