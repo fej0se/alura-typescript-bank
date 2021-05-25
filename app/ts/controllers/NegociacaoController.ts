@@ -2,6 +2,7 @@ import { NegociacoesView, MensagemView } from '../views/index';
 import { Negociacoes, Negociacao, NegociacaoParcial } from '../models/index';
 import { logarTempoDeExecucao, domInject, throttle } from '../helpers/decorators/index';
 import { NegociacaoService } from '../services/index';
+import { imprime } from '../helpers/index';
 
 
 export class NegociacaoController {
@@ -13,7 +14,7 @@ export class NegociacaoController {
 
   @domInject('#valor')
   private _inputValor: JQuery;
-  private _negociacoes: Negociacoes = new Negociacoes();
+  private _negociacoes = new Negociacoes();
   private _negociacoesView = new NegociacoesView('#negociacoesView');
   private _mensagemView = new MensagemView('#mensagemView');
 
@@ -46,6 +47,9 @@ export class NegociacaoController {
     this._negociacoesView.update(this._negociacoes);
     //mensagem view
     this._mensagemView.update('Negociação adicionada com sucesso');
+
+    //imprime no console
+    imprime(negociacao, this._negociacoes, { paraTexto: () => console.log('oi')});
   }
 
   private _ehDiaUtil(data: Date) {
